@@ -750,7 +750,7 @@ void CAdvancedSettings::ParseSettingsFile(const std::string &file)
     TiXmlElement* pVideoLatency = pElement->FirstChildElement("latency");
     if (pVideoLatency)
     {
-      float refresh, refreshmin, refreshmax, delay;
+      float refresh, refreshmin, refreshmax, delay, hdrlatency;
       TiXmlElement* pRefreshVideoLatency = pVideoLatency->FirstChildElement("refresh");
 
       while (pRefreshVideoLatency)
@@ -770,6 +770,9 @@ void CAdvancedSettings::ParseSettingsFile(const std::string &file)
         }
         if (XMLUtils::GetFloat(pRefreshVideoLatency, "delay", delay, -600.0f, 600.0f))
           videolatency.delay = delay;
+
+        if (XMLUtils::GetFloat(pRefreshVideoLatency, "hdrlatency", hdrlatency, -600.0f, 600.0f))
+          videolatency.hdrlatency = hdrlatency;
 
         if (videolatency.refreshmin > 0.0f && videolatency.refreshmax >= videolatency.refreshmin)
           m_videoRefreshLatency.push_back(videolatency);
@@ -1413,14 +1416,18 @@ void CAdvancedSettings::AddSettingsFile(const std::string &filename)
   m_settingsFiles.push_back(filename);
 }
 
-float CAdvancedSettings::GetLatencyTweak(float refreshrate)
+float CAdvancedSettings::GetLatencyTweak(float refreshrate, bool isHDREnabled)
 {
   float delay = m_videoDefaultLatency;
   for (int i = 0; i < (int) m_videoRefreshLatency.size(); i++)
   {
     RefreshVideoLatency& videolatency = m_videoRefreshLatency[i];
     if (refreshrate >= videolatency.refreshmin && refreshrate <= videolatency.refreshmax)
+    {
       delay = videolatency.delay;
+      if (isHDREnabled && videolatency.hdrlatency != NULL)
+        delay += videolatency.hdrlatency;
+    }
   }
 
   return delay; // in milliseconds

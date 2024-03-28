@@ -100,6 +100,7 @@ struct RefreshVideoLatency
   float refreshmax;
 
   float delay;
+  float hdrlatency;
 };
 
 typedef std::vector<TVShowRegexp> SETTINGS_TVSHOWLIST;
@@ -356,7 +357,7 @@ class CAdvancedSettings : public ISettingCallback, public ISettingsHandler
     std::vector<std::string> m_settingsFiles;
     void ParseSettingsFile(const std::string &file);
 
-    float GetLatencyTweak(float refreshrate);
+    float GetLatencyTweak(float refreshrate, bool isHDREnabled);
     bool m_initialized;
 
     void SetDebugMode(bool debug);
